@@ -26,13 +26,13 @@ getwd()  # This shows the folder R is currently using
 # 2. List all files in the working directory
 list.files()  # Shows files in the current folder
 
-# 3. If your files are in a different folder, specify the path
-folder_path <- "C:/Users/Ann/Documents/myrepo/bioassignment"  # <-- replace with your actual path
+# 3Files specify the path
+folder_path <- "C:/Users/Ann/Documents/myrepo/bioassignment" 
 
 # 4. List all files in that folder
 list.files(folder_path)
 
-# 5. Check if your specific FASTA files exist
+# 5. Checking specific FASTA files exist
 file.exists(paste0(folder_path, "/e_coli_cds.fa"))
 file.exists(paste0(folder_path, "/mesomycoplasma_cds.fa"))
 
@@ -174,7 +174,6 @@ barplot(myco_base_freq[c("a","t","g","c")],
 ```
 ```{r}
 library(seqinr)
-# Put your FASTA file in the working directory or provide the full path
 ecoli_cds <- read.fasta(file = "ecoli_cds.fa", seqtype = "DNA")
 meso_cds <- read.fasta(file = "Mesomycoplasma_cds.fa", seqtype = "DNA")
 str(head(ecoli_cds))    # Should show a list of sequences
@@ -252,7 +251,7 @@ barplot(sort(meso_codon_prop), las=2, main="Mesomycoplasma Codon Usage (%)", col
 
 ```
 ```{r}
-# K-mer counting function (for example, k = 3)
+# K-mer counting function
 kmer_counter <- function(seq_vec, k=3) {
   kmers <- unlist(lapply(seq_vec, function(s) {
     n <- nchar(s)
