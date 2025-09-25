@@ -1,0 +1,137 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+# Create a folder for  assignment
+dir.create("bioassignment")
+setwd("bioassignment")  
+
+# Download the files
+download.file("https://github.com/ghazkha/Assessment4/raw/main/gene_expression.tsv", 
+              "gene_expression.tsv")
+download.file("https://github.com/ghazkha/Assessment4/raw/main/growth_data.csv", 
+              "growth_data.csv")
+```
+```{r}
+# Read the file
+gene_data <- read.table("gene_expression.tsv", header = TRUE, row.names = 1)
+
+# 1. Show first six genes
+head(gene_data)
+
+# 2. Add mean column
+gene_data$mean_expression <- rowMeans(gene_data)
+head(gene_data)
+
+# 3. Top 10 genes with highest mean
+top_10 <- gene_data[order(-gene_data$mean_expression), ][1:10, ]
+top_10
+
+# 4. Count genes with mean < 10
+sum(gene_data$mean_expression < 10)
+
+# 5. Make histogram
+hist(gene_data$mean_expression, main = "Gene Expression Means", 
+     xlab = "Mean Expression", col = "lightblue")
+```
+```{r}
+# Read the file
+growth_data <- read.csv("growth_data.csv")
+
+# 6. Show column names 
+colnames(growth_data)
+
+# 7. Calculate mean and standard deviation
+# For start (2005) at control site
+start_control <- growth_data$Circumf_2005_cm[growth_data$Site == "control"]
+mean(start_control)
+sd(start_control)
+
+# For end (2020) at control site
+end_control <- growth_data$Circumf_2020_cm[growth_data$Site == "control"]
+mean(end_control)
+sd(end_control)
+
+# For start (2005) at treatment site
+start_treatment <- growth_data$Circumf_2005_cm[growth_data$Site == "treatment"]
+mean(start_treatment)
+sd(start_treatment)
+
+# For end (2020) at treatment site
+end_treatment <- growth_data$Circumf_2020_cm[growth_data$Site == "treatment"]
+mean(end_treatment)
+sd(end_treatment)
+
+# 8. Make boxplot 
+library(tidyr)
+library(ggplot2)
+
+# Convert data from wide to long format
+long_data <- growth_data %>%
+  pivot_longer(cols = starts_with("Circumf"),
+               names_to = "Year",
+               values_to = "Circumference")
+
+# Clean up year names
+long_data$Year <- gsub("Circumf_", "", long_data$Year)
+long_data$Year <- gsub("_cm", "", long_data$Year)
+
+# Create boxplot
+ggplot(long_data, aes(x = Year, y = Circumference, fill = Site)) +
+  geom_boxplot() +
+  labs(title = "Tree Circumference by Site and Year")
+
+# 9. Calculate mean growth over last 10 years (2010-2020)
+# For control site
+control_growth <- growth_data$Circumf_2020_cm[growth_data$Site == "control"] - 
+                  growth_data$Circumf_2010_cm[growth_data$Site == "control"]
+mean(control_growth)
+
+# For treatment site
+treatment_growth <- growth_data$Circumf_2020_cm[growth_data$Site == "treatment"] - 
+                    growth_data$Circumf_2010_cm[growth_data$Site == "treatment"]
+mean(treatment_growth)
+
+# 10. t-test to compare growth 
+
+
+print("Number of control trees:")
+print(sum(growth_data$Site == "control"))
+
+print("Number of treatment trees:")
+print(sum(growth_data$Site == "treatment"))
+
+# Check 
+if(sum(growth_data$Site == "control") >= 2 && sum(growth_data$Site == "treatment") >= 2) {
+  # Calculate growth for control group
+  control_growth <- growth_data$Circumf_2020_cm[growth_data$Site == "control"] - 
+                    growth_data$Circumf_2010_cm[growth_data$Site == "control"]
+  
+  # Calculate growth for treatment group
+  treatment_growth <- growth_data$Circumf_2020_cm[growth_data$Site == "treatment"] - 
+                      growth_data$Circumf_2010_cm[growth_data$Site == "treatment"]
+  
+  # Remove any NA values
+  control_growth <- control_growth[!is.na(control_growth)]
+  treatment_growth <- treatment_growth[!is.na(treatment_growth)]
+  
+  # Check if we still have enough data after removing NAs
+  if(length(control_growth) >= 2 && length(treatment_growth) >= 2) {
+    t_test_result <- t.test(control_growth, treatment_growth)
+    print(t_test_result)
+  } else {
+    print("Not enough data after removing NA values")
+    print(paste("Control growth observations:", length(control_growth)))
+    print(paste("Treatment growth observations:", length(treatment_growth)))
+  }
+} else {
+  print("Not enough trees in one or both groups for t-test")
+  print(paste("Control trees:", sum(growth_data$Site == "control")))
+  print(paste("Treatment trees:", sum(growth_data$Site == "treatment")))
+}
+```
+
+
